@@ -4,7 +4,7 @@
 
 ## 下载
 
-到 [Releases](https://github.com/q10283245/door-companion/releases) 下载 `door-companion-1.6.0-no-key.apk`。安装包不预置任何模型或地图密钥，AI 默认关闭。Android 10+。
+到 [Releases](https://github.com/q10283245/door-companion/releases) 下载 `door-companion-1.6.1-no-key.apk`。安装包不预置任何模型或地图密钥，AI 默认关闭。Android 10+。
 
 ## 功能
 
@@ -45,3 +45,21 @@ DOOR_BUILD_TOOLS=/absolute/path/to/tools bash build.sh
 ## 版本 1.6.0
 
 新增应用内「我的」页；提供不带密钥的公开安装包；公开包采用新生成录音。
+
+
+## ☕ 请我喝杯咖啡
+
+或者，给测试模型加点额度。如果这个小项目为你带来了一点乐趣，欢迎支持后续开发、维护和模型接口测试。
+
+**完全自愿，金额随心，不影响任何功能使用。赞助用于作者的开发与测试，不会自动为你的模型账户充值。**
+
+微信 / 支付宝扫码支持（点击图片查看大图）：
+
+<a href="assets/sponsor/wechat.jpg"><img src="assets/sponsor/wechat.jpg" width="230" alt="微信赞助收款码"></a>
+<a href="assets/sponsor/alipay.jpg"><img src="assets/sponsor/alipay.jpg" width="230" alt="支付宝赞助收款码"></a>
+
+收款人：晚风（*威）。应用内入口：「我的」→「请我喝杯咖啡」。
+
+### 1.6.1
+
+新增自愿赞助入口与微信、支付宝收款码弹层；无强制弹窗、付费解锁或支付结果采集。仍是不带密钥的安装包。
