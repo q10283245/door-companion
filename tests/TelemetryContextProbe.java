@@ -1,0 +1,8 @@
+import wb.*;import org.json.*;import java.util.*;
+public class TelemetryContextProbe {
+ static int n;static void ok(boolean a){n++;if(!a)throw new AssertionError("case "+n);}
+ public static void main(String[] args)throws Exception{final List<String> calls=new ArrayList<>();VehicleTelemetry.Reader reader=(m,c)->{calls.add(m+":"+c);if(m==0x50004&&c==0)return new int[]{0};if(m==0x50004&&c==68)return new int[]{2,113};if(m==0x50004&&c==72)return new int[]{1,164};if(m==0x5000a&&c==10)return new int[]{0};return null;};
+ VehicleTelemetry t=new VehicleTelemetry(reader,new JSONObject().put("vehicle",true).put("fuel",true).put("temperature",true));ok(t.context.getDouble("fuel_percent")==62.5);ok(t.context.getInt("remaining_range_km")==420);ok(t.context.getString("driver_ac_setpoint_mode").equals("LO"));ok(t.context.isNull("gear"));ok(t.context.getJSONObject("unavailable_fields").has("gear"));ok(t.diagnostics.getJSONObject("fuel_percent").getJSONArray("raw").getInt(0)==2);ok(!t.context.toString().contains("\"raw\""));
+ calls.clear();VehicleTelemetry off=new VehicleTelemetry(reader,new JSONObject().put("vehicle",false).put("fuel",false).put("temperature",false));ok(calls.isEmpty());ok(!off.context.has("fuel_percent"));ok(off.diagnostics.length()==0);
+ JSONObject body=ModelClient.payload(new JSONObject().put("model","m").put("persona","test"),t.context,"普通提示");String message=body.getJSONArray("messages").getJSONObject(1).getString("content");ok(message.contains("fuel_percent"));ok(message.contains("62.5"));ok(!message.contains("\"raw\""));System.out.println(n+" normalized-context, LO/HI and disabled-field assertions passed");}
+}

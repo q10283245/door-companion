@@ -1,0 +1,12 @@
+*.ks
+.private/
+.tools/
+.aapt2/
+classes/
+dexout/
+base.apk
+classes.dex
+panel.apk
+*.class
+assets/personal-config.json
+.DS_Store

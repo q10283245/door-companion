@@ -1,0 +1,14 @@
+package wb;
+import org.json.*;import java.net.*;import java.io.*;import java.util.Locale;
+/** HTTPS-only Amap web API; GPS WGS84 is converted before reverse geocoding. */
+public final class AmapAddress {
+ public interface Transport {JSONObject get(String route,String parameters)throws Exception;}
+ static String enc(String s)throws Exception{return URLEncoder.encode(s,"UTF-8");}
+ public static JSONObject lookup(String key,double lat,double lon)throws Exception{return lookup(key,lat,lon,AmapAddress::request);}
+ public static JSONObject lookup(String key,double lat,double lon,Transport t)throws Exception{
+  String original=String.format(Locale.US,"%.6f,%.6f",lon,lat);JSONObject conversion=t.get("/v3/assistant/coordinate/convert","locations="+enc(original)+"&coordsys=gps&key="+enc(key)+"&output=JSON");success(conversion);String converted=conversion.optString("locations","");String[] parts=converted.split(",");if(parts.length!=2)throw new IOException("invalid coordinate response");double x=Double.parseDouble(parts[0]),y=Double.parseDouble(parts[1]);if(!Double.isFinite(x)||!Double.isFinite(y)||x< -180||x>180||y< -90||y>90)throw new IOException("invalid converted coordinate");String location=String.format(Locale.US,"%.6f,%.6f",x,y);
+  JSONObject response=t.get("/v3/geocode/regeo","location="+enc(location)+"&key="+enc(key)+"&extensions=base&output=JSON");success(response);JSONObject regeo=response.optJSONObject("regeocode");if(regeo==null)return null;JSONObject components=regeo.optJSONObject("addressComponent");if(components==null)return null;JSONObject out=new JSONObject();for(String k:new String[]{"country","province","city","district","township"}){String s=AddressPolicy.text(components,k);if(!s.isEmpty())out.put(k,s);}JSONObject street=components.optJSONObject("streetNumber");if(street!=null)for(String k:new String[]{"street","number"}){String s=AddressPolicy.text(street,k);if(!s.isEmpty())out.put(k,s);}return out;
+ }
+ static void success(JSONObject j)throws Exception{if(!"1".equals(j.optString("status")))throw new AddressResolver.Unavailable("高德接口拒绝请求（"+j.optString("infocode","unknown").replaceAll("[^0-9]","")+"），请检查 Key、额度或授权");}
+ static JSONObject request(String route,String params)throws Exception{if(!route.equals("/v3/assistant/coordinate/convert")&&!route.equals("/v3/geocode/regeo"))throw new IOException();HttpURLConnection c=(HttpURLConnection)new URL("https://restapi.amap.com"+route+"?"+params).openConnection();c.setInstanceFollowRedirects(false);c.setConnectTimeout(2500);c.setReadTimeout(2500);try{if(c.getResponseCode()!=200)throw new IOException("map http failure");StringBuilder text=new StringBuilder();try(Reader in=new InputStreamReader(c.getInputStream(),"UTF-8")){char[] buf=new char[2048];int n;while((n=in.read(buf))!=-1){text.append(buf,0,n);if(text.length()>65536)throw new IOException("map response too large");}}return new JSONObject(text.toString());}finally{c.disconnect();}}
+}
